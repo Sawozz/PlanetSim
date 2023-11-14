@@ -85,5 +85,5 @@ class Planet:
 
         if not self.timestep == 0:
             self.orbit.append((self.x, self.y))
-            if len(self.orbit) > 100:
+            if len(self.orbit) > 150:
                 self.orbit.pop(0)

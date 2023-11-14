@@ -38,10 +38,18 @@ class Game:
         venus = Planet(0.723 * Planet.AU, 0, 14, self.settings.WHITE, 4.8685 * 10 ** 24, self.process, self.settings)
         venus.y_vel = -35.02 * 1000
 
-        me = Planet(4 * Planet.AU, 0.5 * Planet.AU, 9, (150, 80, 56), 3 * 10 ** 29, self.process, self.settings)
-        me.y_vel = -10000
+        chaosPotato = Planet(2 * Planet.AU, 0.5 * Planet.AU, 21, (150, 80, 56), 8 * 10 ** 27, self.process, self.settings)
+        chaosPotato.y_vel = -23000
 
-        self.planets = [sun, earth, mars, mercury, venus]
+        chaosPotato1 = Planet(-3.8 * Planet.AU, 0 * Planet.AU, 14, (225, 100, 100), 8 * 10 ** 26, self.process,
+                             self.settings)
+        chaosPotato1.y_vel = -11000
+
+        chaosPotato2 = Planet(2.8 * Planet.AU, 0.5 * Planet.AU, 18, (150, 209, 200), 28 * 10 ** 26, self.process,
+                             self.settings)
+        chaosPotato2.y_vel = 15000
+
+        self.planets = [sun, earth, mars, mercury, venus, chaosPotato,chaosPotato1,chaosPotato2]
 
         # self.interface = InterfaceController(self.window)
         #
@@ -84,9 +92,9 @@ class Game:
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
-                self.process.scale += 2
+                self.process.scale = pygame.math.clamp(self.process.scale + 2, 20, 180)
             elif keys[pygame.K_s]:
-                self.process.scale -= 2
+                self.process.scale = pygame.math.clamp(self.process.scale - 2, 20, 180)
 
             self.window.fill((0, 0, 0))
 
