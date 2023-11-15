@@ -49,25 +49,37 @@ class Game:
                              self.settings)
         chaosPotato2.y_vel = 15000
 
-        self.planets = [sun, earth, mars, mercury, venus, chaosPotato,chaosPotato1,chaosPotato2]
+        self.planets = [sun, earth, mars, mercury, venus, chaosPotato, chaosPotato1, chaosPotato2]
 
-        # self.interface = InterfaceController(self.window)
-        #
-        # main_menu = Canvas((400, self.settings.HEIGHT), (self.settings.WIDTH - 500, 0), (20, 20, 20))
-        # self.interface.append_group("MainMenu", main_menu)
-        #
-        # label = Label((0, 0), 0)
-        # empty = Empty((0, 0), (100, 100))
-        # label2 = Label((0, 0), 0)
-        # label2.set_function("Hover", self.func, obj=label2).bind("AAAA")
-        #
-        # self.interface.groups["MainMenu"].append_element("Label1", label)
-        # self.interface.groups["MainMenu"].append_element("Empty", empty)
-        # self.interface.groups["MainMenu"].append_element("Label2", label2)
-        # self.interface.set_updating_group("MainMenu", True)
+        self.interface = InterfaceController(self.window)
 
-    def func(self, pr):
-        # Функция для тестирования работы hover
+        main_menu = Canvas((self.settings.WIDTH - 500, 0), (400, self.settings.HEIGHT), (20, 20, 20))
+        self.interface.append_group("MainMenu", main_menu)
+
+        label = Label("HOVER", background_color = (100, 255, 100))
+        label.mouse_scroll.connect(self.funch).bind("AAAA")
+
+        empty = Empty((100, 100))
+        label2 = Label("ENTER")
+        label2.enter_hover.connect(self.funcen).bind("ENTER")
+
+        label3 = Label("EXIT")
+        label3.just_pressed.connect(self.funcex).bind("EXIT")
+
+        self.interface.groups["MainMenu"].append_element("Label1", label)
+        self.interface.groups["MainMenu"].append_element("Empty", empty)
+        self.interface.groups["MainMenu"].append_element("Label2", label2)
+        self.interface.groups["MainMenu"].append_element("Label2", label3)
+        self.interface.set_updating_group("MainMenu", True)
+
+    def funch(self, p, pr):
+        print(p)
+        print(pr)
+
+    def funcen(self, pr):
+        print(pr)
+
+    def funcex(self, pr):
         print(pr)
 
     def run(self):
@@ -77,6 +89,8 @@ class Game:
             self.cock.tick(60)
 
             for event in pygame.event.get():
+                self.interface.update(event)
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -102,7 +116,7 @@ class Game:
                 planet.position(self.planets)
                 planet.draw(self.window)
 
-            # self.interface.update()
+            self.interface.draw()
 
             pygame.display.update()
 
