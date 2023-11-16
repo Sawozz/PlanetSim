@@ -28,6 +28,6 @@ class InterfaceController:
         for group in self.updating_group:
             group.draw(self.win)
 
-    def update(self, event: pygame.event.Event) -> None:
+    def update(self, events: list[pygame.event.Event]) -> None:
         for group in self.updating_group:
-            group.update(self.win, event)
+            group.update(self.win, events)

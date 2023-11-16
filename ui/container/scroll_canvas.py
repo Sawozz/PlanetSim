@@ -27,7 +27,7 @@ class ScrollCanvas(Canvas, FuncController):
         if self._get_elements_size(self.elements[-1][1])[1] > self.get_size()[1]:
             self.offset_element = pygame.math.clamp(
                 self.offset_element - offset_inc * self.scroll_speed,
-                -self._get_elements_size(self.elements[-1][1])[1] + self.get_size()[1],
+                -self._get_elements_size(self.elements[-1][1])[1] + self.get_size()[1] - self.elements[-1][1].get_size()[1],
                 0
             )
 
@@ -49,8 +49,8 @@ class ScrollCanvas(Canvas, FuncController):
 
         win.blit(self.img, self.position.get_tuple())
 
-    def update(self, _win: pygame.Surface, event: pygame.event.Event) -> None:
+    def update(self, _win: pygame.Surface, events: list[pygame.event.Event]) -> None:
         for idx, element in enumerate(self.elements):
             if "update" in dir(element[1]) and element[0] in self.updating_elements:
-                element[1].update(self.img, event)
-        self.func_controller_update(event)
+                element[1].update(self.img, events)
+        self.func_controller_update(events)

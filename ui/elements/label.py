@@ -25,7 +25,7 @@ class Label(Element, FuncController):
 
         self.__update_background()
 
-    def set_text(self, text: str, size: int, color: tuple = (255, 255, 255)) -> None:
+    def set_text(self, text: str, size: int = 24, color: tuple = (255, 255, 255)) -> None:
         font = pygame.font.SysFont("comicsans", size)
         self.img = font.render(text, 1, color)
         self.__update_background()
@@ -55,17 +55,17 @@ class Label(Element, FuncController):
 
     def draw(self, win: pygame.Surface) -> None:
         if self.back_img:
-            win.blit(self.back_img, self.position.get_tuple())
+            win.blit(self.back_img, (self.get_rect_local()[0], self.get_rect_local()[1]))
             win.blit(self.img, (
-                (self.get_size()[0] / 2 - self.img.get_size()[0] / 2) + self.position.x,
-                (self.get_size()[1] / 2 - self.img.get_size()[1] / 2) + self.position.y
+                (self.get_size()[0] / 2 - self.img.get_size()[0] / 2) + self.position.x + self.position.offset.x,
+                (self.get_size()[1] / 2 - self.img.get_size()[1] / 2) + self.position.y + self.position.offset.y
             ))
 
         else:
             win.blit(self.img, (self.get_rect_local()[0], self.get_rect_local()[1]))
 
-    def update(self, _win: pygame.Surface, event: pygame.event.Event) -> None:
-        self.func_controller_update(event)
+    def update(self, _win: pygame.Surface, events: list[pygame.event.Event]) -> None:
+        self.func_controller_update(events)
 
     def get_size(self) -> tuple[int, int]:
         if self.back_img:

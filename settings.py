@@ -1,5 +1,5 @@
 class Settings:
-    WIDTH, HEIGHT = 1000, 800
+    WIDTH, HEIGHT = 1600, 1000
 
     WHITE = (255, 255, 255)
     YELLOW = (255, 255, 0)

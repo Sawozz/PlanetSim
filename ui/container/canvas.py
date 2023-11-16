@@ -71,10 +71,10 @@ class Canvas:
 
         win.blit(self.img, self.position.get_tuple())
 
-    def update(self, _win: pygame.Surface, event: pygame.event.Event) -> None:
+    def update(self, _win: pygame.Surface, events: list[pygame.event.Event]) -> None:
         for idx, element in enumerate(self.elements):
             if "update" in dir(element[1]):
-                element[1].update(self.img, event)
+                element[1].update(self.img, events)
 
     def _update_size(self) -> None:
         if self.is_resize:

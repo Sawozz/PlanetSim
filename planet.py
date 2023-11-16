@@ -10,6 +10,8 @@ class Planet:
     G = 6.67428e-11
 
     def __init__(self, _position, radius, color, mass, process, settings):
+        self.name = "Planet"
+
         self.position = Vector2()
         self.position.set_pos(_position)
 
