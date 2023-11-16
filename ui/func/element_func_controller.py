@@ -30,14 +30,22 @@ class FuncController:
 
         self.just_pressed = self.JustPressed(self)
         """Функция вызывается единожды, при нажатии переданной кнопки мыши.
-        Допустимые кнопки мыши:
+        Допустимые кнопки мыши (прописываются через 'mouse_button = '):
         0 - левая
         1 - средняя
         2 - правая"""
 
+        self.switch = self.Switch(self)
+        """Функция вызывается единожды, при нажатии переданной кнопки мыши.
+        Допустимые кнопки мыши (прописываются через 'mouse_button = '):
+        0 - левая,
+        1 - средняя,
+        2 - правая.
+        У вызываемой функции должен быть обязательный параметр типа bool."""
+
         self.mouse_scroll = self.MouseScroll(self)
-        """Функция вызывается в момент использования колесика мыши. У функции должен быть обязательный
-        параметр типа int. Функция возвращает одно из двух значений: 1, либо -1."""
+        """Функция вызывается в момент использования колесика мыши. У вызываемой функции должен быть обязательный
+        параметр типа int. Метод возвращает одно из двух значений: 1, либо -1."""
 
         self.__updating = []
 
@@ -151,15 +159,34 @@ class FuncController:
     class JustPressed(Pressed):
         def __init__(self, controller) -> None:
             super().__init__(controller)
-            self.just_press_flag = False
+            self.__just_press_flag = False
 
         def _hover(self, is_hover: bool, _event: pygame.event.Event) -> None:
             if is_hover:
-                if pygame.mouse.get_pressed()[self.mouse_button] and not self.just_press_flag:
+                if pygame.mouse.get_pressed()[self.mouse_button] and not self.__just_press_flag:
                     self.func(*self.args)
-                    self.just_press_flag = True
+                    self.__just_press_flag = True
                 else:
-                    self.just_press_flag = False
+                    self.__just_press_flag = False
+
+    class Switch(JustPressed):
+        def __init__(self, controller) -> None:
+            super().__init__(controller)
+            self.state = False
+
+        def set_state(self, _state: bool) -> None:
+            self.state = _state
+            if self.func:
+                self.func(self.state, *self.args)
+
+        def _hover(self, is_hover: bool, _event: pygame.event.Event) -> None:
+            if is_hover:
+                if pygame.mouse.get_pressed()[self.mouse_button] and not self.__just_press_flag:
+                    self.state = not self.state
+                    self.func(self.state, *self.args)
+                    self.__just_press_flag = True
+                else:
+                    self.__just_press_flag = False
 
     class MouseScroll(Hover):
         def __init__(self, controller) -> None:

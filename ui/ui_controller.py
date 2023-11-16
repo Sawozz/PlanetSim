@@ -1,6 +1,6 @@
 import pygame
 
-from ui.elements.canvas import Canvas
+from ui.container.canvas import Canvas
 
 
 class InterfaceController:
@@ -30,4 +30,4 @@ class InterfaceController:
 
     def update(self, event: pygame.event.Event) -> None:
         for group in self.updating_group:
-            group.update(event)
+            group.update(self.win, event)

@@ -2,14 +2,17 @@ import pygame
 import pygame.gfxdraw
 import math
 
+from mathem.vector import Vector2
+
 
 class Planet:
     AU = 149.6e6 * 1000
     G = 6.67428e-11
 
-    def __init__(self, x, y, radius, color, mass, process, settings):
-        self.x = x
-        self.y = y
+    def __init__(self, _position, radius, color, mass, process, settings):
+        self.position = Vector2()
+        self.position.set_pos(_position)
+
         self.radius = radius
         self.color = color
         self.mass = mass
@@ -18,21 +21,23 @@ class Planet:
         self.sun = False
         self.distance_to_sun = 0
 
-        self.x_vel = 0
-        self.y_vel = 0
+        self.velocity = Vector2()
 
         self.process = process
         self.settings = settings
         self.scale = self.process.scale / self.AU
         self.timestep = 3600 * 24 * self.process.speed
 
-        self.font = pygame.font.SysFont("comicsans", 16)
+        self.font = pygame.font.SysFont(self.settings.FONT_NAME, 16)
+
+    def set_movement(self, y_velocity: float) -> None:
+        self.velocity.y = y_velocity
 
     def draw(self, win):
         self.scale = self.process.scale / self.AU
 
-        x = self.x * self.scale + self.settings.WIDTH / 2
-        y = self.y * self.scale + self.settings.HEIGHT / 2
+        x = self.position.x * self.scale + self.settings.WIDTH / 2
+        y = self.position.y * self.scale + self.settings.HEIGHT / 2
 
         if len(self.orbit) > 2:
             updated_points = []
@@ -51,9 +56,8 @@ class Planet:
             win.blit(distance_text, (x - distance_text.get_width() / 2, y - distance_text.get_height() / 2))
 
     def attraction(self, other):
-        other_x, other_y = other.x, other.y
-        distance_x = other.x - self.x
-        distance_y = other_y - self.y
+        distance_x = other.position.x - self.position.x
+        distance_y = other.position.y - self.position.y
         distance = math.sqrt(distance_x ** 2 + distance_y ** 2)
 
         if other.sun:
@@ -65,7 +69,7 @@ class Planet:
         force_y = math.sin(theta) * force
         return force_x, force_y
 
-    def position(self, planets):
+    def update(self, planets):
         self.timestep = 3600 * 24 * self.process.speed
 
         total_fx = total_fy = 0
@@ -77,13 +81,13 @@ class Planet:
             total_fx += fx
             total_fy += fy
 
-        self.x_vel += total_fx / self.mass * self.timestep
-        self.y_vel += total_fy / self.mass * self.timestep
+        self.velocity.x += total_fx / self.mass * self.timestep
+        self.velocity.y += total_fy / self.mass * self.timestep
 
-        self.x += self.x_vel * self.timestep
-        self.y += self.y_vel * self.timestep
+        self.position.x += self.velocity.x * self.timestep
+        self.position.y += self.velocity.y * self.timestep
 
         if not self.timestep == 0:
-            self.orbit.append((self.x, self.y))
+            self.orbit.append((self.position.x, self.position.y))
             if len(self.orbit) > 150:
                 self.orbit.pop(0)

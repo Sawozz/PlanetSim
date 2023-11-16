@@ -53,16 +53,16 @@ class Label(Element, FuncController):
             self.back_img = pygame.Surface((x, y))
             self.back_img.fill(self.back_color)
 
-    def draw(self, win: pygame.Surface, _elements: list[Element]) -> None:
+    def draw(self, win: pygame.Surface) -> None:
         if self.back_img:
-            win.blit(self.back_img, self.position)
+            win.blit(self.back_img, self.position.get_tuple())
             win.blit(self.img, (
-                (self.get_rect_local()[2] / 2 + self.get_rect_local()[0]) - (self.img.get_size()[0] / 2),
-                (self.get_rect_local()[3] / 2 + self.get_rect_local()[1]) - (self.img.get_size()[1] / 2)
+                (self.get_size()[0] / 2 - self.img.get_size()[0] / 2) + self.position.x,
+                (self.get_size()[1] / 2 - self.img.get_size()[1] / 2) + self.position.y
             ))
 
         else:
-            win.blit(self.img, self.position)
+            win.blit(self.img, (self.get_rect_local()[0], self.get_rect_local()[1]))
 
     def update(self, _win: pygame.Surface, event: pygame.event.Event) -> None:
         self.func_controller_update(event)
@@ -75,15 +75,14 @@ class Label(Element, FuncController):
 
     def get_rect_local(self) -> tuple[int, int, int, int]:
         if self.back_img:
-            return self.position[0], self.position[1], self.back_size[0] + self.position[0], self.back_size[1] + self.position[1]
+            return self.get_pos_offset()[0], self.get_pos_offset()[1], self.back_size[0] + self.get_pos_offset()[0], self.back_size[1] + self.get_pos_offset()[1]
 
         else:
-            return self.position[0], self.position[1], self.img.get_size()[0] + self.position[0], self.img.get_size()[1] + self.position[1]
+            return self.get_pos_offset()[0], self.get_pos_offset()[1], self.img.get_size()[0] + self.get_pos_offset()[0], self.img.get_size()[1] + self.get_pos_offset()[1]
 
     def get_rect_world(self) -> tuple[int, int, int, int]:
         if self.back_img:
-            return self.world_position[0], self.world_position[1], self.back_size[0] + self.world_position[0], self.back_size[1] + self.world_position[1]
+            return self.get_world_pos_offset()[0], self.get_world_pos_offset()[1], self.back_size[0] + self.get_world_pos_offset()[0], self.back_size[1] + self.get_world_pos_offset()[1]
 
         else:
-            return self.world_position[0], self.world_position[1], self.img.get_size()[0] + self.world_position[0], self.img.get_size()[1] + self.world_position[1]
-
+            return self.get_world_pos_offset()[0], self.get_world_pos_offset()[1], self.img.get_size()[0] + self.get_world_pos_offset()[0], self.img.get_size()[1] + self.get_world_pos_offset()[1]
