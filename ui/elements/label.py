@@ -18,6 +18,7 @@ class Label(Element, FuncController):
         font = pygame.font.SysFont("comicsans", text_size)
         self.img = font.render(text, 1, text_color)
 
+        self.text = text
         self.back_size = size
         self.back_padding = background_padding
         self.back_color = background_color
@@ -26,9 +27,13 @@ class Label(Element, FuncController):
         self.__update_background()
 
     def set_text(self, text: str, size: int = 24, color: tuple = (255, 255, 255)) -> None:
+        self.text = text
         font = pygame.font.SysFont("comicsans", size)
         self.img = font.render(text, 1, color)
         self.__update_background()
+
+    def get_text(self):
+        pass
 
     def set_background(self, size: tuple = (0, 0), padding: tuple = (0, 0), color: tuple = (0, 0, 0)) -> None:
         self.back_size = size
@@ -65,7 +70,7 @@ class Label(Element, FuncController):
             win.blit(self.img, (self.get_rect_local()[0], self.get_rect_local()[1]))
 
     def update(self, _win: pygame.Surface, events: list[pygame.event.Event]) -> None:
-        self.func_controller_update(events)
+        self.func_controller_update(events, (self.parent_layer, self.parent.controller.mouse_layer))
 
     def get_size(self) -> tuple[int, int]:
         if self.back_img:

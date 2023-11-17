@@ -10,6 +10,9 @@ class Element:
         self.position = Vector2()
         self.world_position = Vector2()
 
+        self.parent = None
+        self.parent_layer = 0
+
     def set_offset(self, offset: tuple[int, int]) -> None:
         self.position.set_offset(offset)
         self.world_position.set_offset(offset)

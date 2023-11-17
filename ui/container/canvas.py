@@ -34,6 +34,10 @@ class Canvas:
         self.up_down_padding = padding[1]
         self.between_padding = padding[2]
 
+        self.parent = None
+        self.controller = None
+        self.self_layer = 0
+
     def set_offset(self, offset: tuple[int, int]) -> None:
         self.position.set_offset(offset)
         self.world_position.set_offset(offset)
@@ -46,6 +50,12 @@ class Canvas:
         self.elements.append([element_name, element])
         element.position.set_pos(self._get_elements_size(element))
         element.world_position.set_pos((self.world_position.x + element.position.x, self.world_position.y + element.position.y))
+        element.parent = self
+        if "self_layer" in dir(element):
+            element.self_layer = self.self_layer + 1
+            element.controller = self.controller
+        if "parent_layer" in dir(element):
+            element.parent_layer = self.self_layer
 
         self._update_size()
 
@@ -72,33 +82,67 @@ class Canvas:
         win.blit(self.img, self.position.get_tuple())
 
     def update(self, _win: pygame.Surface, events: list[pygame.event.Event]) -> None:
+        self._set_mouse_layer()
         for idx, element in enumerate(self.elements):
             if "update" in dir(element[1]):
                 element[1].update(self.img, events)
 
     def _update_size(self) -> None:
         if self.is_resize:
-            x, y = self.left_right_padding, self.up_down_padding
-            for element in self.elements:
-                x = element.get_size()[0]
-            self.img = pygame.Surface((x, y))
+            x, y = 0, 0
+            new_x, new_y = self._get_elements_size(self.elements[-1][1], True)
 
-    def _get_elements_size(self, element: Element) -> tuple[int, int]:
+            if self.positioning == self.UP_DOWN:
+                y = new_y
+                for element in self.elements:
+                    if element[1].get_size()[0] > x:
+                        x = element[1].get_size()[0]
+
+            if self.positioning == self.LEFT_RIGHT:
+                x = new_x
+                for element in self.elements:
+                    if element[1].get_size()[1] > y:
+                        y = element[1].get_size()[1]
+
+            self.img = pygame.Surface((x + self.left_right_padding * 2, y + self.up_down_padding * 2))
+
+    def _get_elements_size(self, element: Element, include_pass: bool = False) -> tuple[int, int]:
         if self.positioning == self.UP_DOWN:
             y = 0
             for _element in self.elements:
                 if element == _element[1]:
-                    return self.left_right_padding, y + self.up_down_padding
+                    if include_pass:
+                        return self.left_right_padding, y + self.up_down_padding + _element[1].get_size()[1]
+                    else:
+                        return self.left_right_padding, y + self.up_down_padding
                 y += _element[1].get_size()[1] + self.between_padding
 
         if self.positioning == self.LEFT_RIGHT:
             x = 0
             for _element in self.elements:
                 if element == _element[1]:
-                    return x + self.left_right_padding, self.up_down_padding
-                x += _element[1].get_size()[0]
+                    if include_pass:
+                        return x + self.left_right_padding + _element[1].get_size()[0], self.up_down_padding
+                    else:
+                        return x + self.left_right_padding, self.up_down_padding
+                x += _element[1].get_size()[0] + self.between_padding
 
         return self.left_right_padding, self.up_down_padding
+
+    def _set_mouse_layer(self):
+        if self.controller:
+            mouse_pos = pygame.mouse.get_pos()
+
+            if (self.get_rect_world()[0] <= mouse_pos[0] <=
+                    self.get_rect_world()[2] and
+                    self.get_rect_world()[1] <= mouse_pos[1] <=
+                    self.get_rect_world()[3]):
+                if self.controller.mouse_layer < self.self_layer:
+                    self.controller.mouse_layer = self.self_layer
+
+            else:
+                if self.controller.mouse_layer == self.self_layer:
+                    self.controller.mouse_layer -= 1
 
     def get_pos_offset(self) -> tuple[int, int]:
         return self.position.x, self.position.y + self.position.offset.y

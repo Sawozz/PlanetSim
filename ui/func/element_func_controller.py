@@ -55,6 +55,11 @@ class FuncController:
         """Функция вызывается в момент использования колесика мыши. У вызываемой функции должен быть обязательный
         параметр типа int. Метод возвращает одно из двух значений: 1, либо -1."""
 
+        self.unicode_typing = self.UnicodeTyping(self)
+        """Функция вызывается в момент набора текста, но только в случае если элемент находится в фокусе
+        (для этого необходимо его выбрать нажатием мыши). Для снятия можно повторно нажать по элементу, либо
+        нажать ENTER. Метод возвращает символ нажатой клавиши"""
+
         self.__updating = []
 
     def add_update(self, func) -> None:
@@ -63,9 +68,9 @@ class FuncController:
     def del_update(self, func) -> None:
         self.__updating.remove(func)
 
-    def func_controller_update(self, events: list[pygame.event.Event]) -> None:
+    def func_controller_update(self, events: list[pygame.event.Event], layers: tuple[int, int]) -> None:
         for _func in self.__updating:
-            _func.process(events)
+            _func.process(events, layers)
 
     class Update:
         def __init__(self, controller) -> None:
@@ -87,7 +92,7 @@ class FuncController:
         def is_connect(self) -> bool:
             return self.func
 
-        def process(self, _events: list[pygame.event.Event]) -> None:
+        def process(self, _events: list[pygame.event.Event], _layers: tuple[int, int]) -> None:
             if self.func:
                 self.func(*self.args)
 
@@ -105,7 +110,7 @@ class FuncController:
             super().disconnect()
             self.object = None
 
-        def process(self, events: list[pygame.event.Event]) -> None:
+        def process(self, events: list[pygame.event.Event], layers: tuple[int, int]) -> None:
             if self.func and self.object:
                 is_hover = False
                 mouse_pos = pygame.mouse.get_pos()
@@ -113,7 +118,7 @@ class FuncController:
                 if (self.object.get_rect_world()[0] <= mouse_pos[0] <=
                         self.object.get_rect_world()[2] and
                         self.object.get_rect_world()[1] <= mouse_pos[1] <=
-                        self.object.get_rect_world()[3]):
+                        self.object.get_rect_world()[3]) and layers[0] == layers[1]:
                     is_hover = True
 
                 self._hover(is_hover, events)
@@ -215,3 +220,15 @@ class FuncController:
                             self.func(-1, *self.args)
                         if event.button == 5:
                             self.func(1, *self.args)
+
+    class UnicodeTyping(Hover):
+        def __init__(self, controller) -> None:
+            super().__init__(controller)
+
+        def _hover(self, is_hover: bool, events: list[pygame.event.Event]) -> None:
+            if is_hover:
+                for event in events:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+                        self.func("Backspace", *self.args)
+                    if event.type == pygame.TEXTINPUT:
+                        self.func(event.text, *self.args)
