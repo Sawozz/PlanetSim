@@ -3,19 +3,27 @@ import pygame.gfxdraw
 import math
 
 from mathem.vector import Vector2
+from mathem.collision import get_collide
 
 
-class Planet:
+class Planet(pygame.sprite.Sprite):
     AU = 149.6e6 * 1000
     G = 6.67428e-11
 
     def __init__(self, _position, radius, color, mass, process, settings):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, color, (radius, radius), radius)
+        self.rect = pygame.Rect(_position[0], _position[1], 0, 0).inflate(radius * 2, radius * 2)
+
         self.name = "Planet"
 
         self.position = Vector2()
         self.position.set_pos(_position)
 
+        self.def_rad = radius
         self.radius = radius
+
         self.color = color
         self.mass = mass
 
@@ -36,6 +44,7 @@ class Planet:
         self.velocity.y = y_velocity
 
     def draw(self, win):
+        self.radius = self.def_rad
         self.scale = self.process.scale / self.AU
 
         x = self.position.x * self.scale + self.settings.WIDTH / 2
@@ -51,7 +60,12 @@ class Planet:
 
             pygame.draw.lines(win, self.color, False, updated_points, 2)
 
-        pygame.draw.circle(win, self.color, (x, y), self.radius * (self.process.scale / 150))
+        self.rect.center = (x, y)
+        self.radius = self.def_rad * (self.process.scale / 150)
+
+        self.image.fill((0, 0, 0, 0))
+        pygame.draw.circle(self.image, self.color, (self.def_rad, self.def_rad), self.def_rad * (self.process.scale / 150))
+        win.blit(self.image, self.rect.topleft)
 
         if not self.sun:
             distance_text = self.font.render("", 1, (255, 255, 255))
@@ -93,3 +107,12 @@ class Planet:
             self.orbit.append((self.position.x, self.position.y))
             if len(self.orbit) > 150:
                 self.orbit.pop(0)
+
+    def collide(self, sprite_list):
+        for sprite in get_collide(self, sprite_list):
+            # print("self name:", self.name, "| target name:", sprite.name)
+            col_vec_x = (self.mass * self.velocity.x + sprite.mass * sprite.velocity.x) / (self.mass + sprite.mass)
+            col_vec_y = (self.mass * self.velocity.y + sprite.mass * sprite.velocity.y) / (self.mass + sprite.mass)
+
+            self.velocity.set_posf((col_vec_x, col_vec_y))
+            sprite.velocity.set_posf((col_vec_x * 1.1, col_vec_y * 1.1))

@@ -27,9 +27,6 @@ class Game:
 
         self.cock = pygame.time.Clock()
 
-        self.planets = []
-        self.planet_respawn()
-
         # == Интерфейс ==
 
         self.interface = InterfaceController(self.window)
@@ -124,14 +121,12 @@ class Game:
         scroll_menu.process.connect(self._update_planet_info).bind(label_name, label_pos, label_size, label_mass, label_vel)
         self._show_info_planet = None
 
-        for planet in self.planets:
-            btn = Button(text = planet.name, size = (400, 60))
-            btn.set_reaction_color(static = (43, 45, 66))
-            btn.just_pressed.connect(self._set_planet_info).bind(planet)
-            self.interface.groups["MainMenu"].get_element_by_name("Scroll").append_element("Button_" + str(random.randint(0, 999)), btn)
+        self.planets = pygame.sprite.Group()
+        self.planet_respawn()
 
     def planet_respawn(self):
-        self.planets.clear()
+        self.interface.groups["MainMenu"].get_element_by_name("Scroll").clear_elements()
+        self.planets.empty()
 
         sun = Planet((0, 0), 30, self.settings.YELLOW, 1.98892 * 10 ** 30, self.process, self.settings)
         sun.sun = True
@@ -169,7 +164,13 @@ class Game:
         chaosPotato2.set_movement(15000)
         chaosPotato2.name = "Хаос Потато II"
 
-        self.planets = [sun, earth, mars, mercury, venus, chaosPotato, chaosPotato1, chaosPotato2]
+        self.planets.add([sun, earth, mars, mercury, venus, chaosPotato, chaosPotato1, chaosPotato2])
+
+        for planet in self.planets:
+            btn = Button(text = planet.name, size = (400, 60))
+            btn.set_reaction_color(static = (43, 45, 66))
+            btn.just_pressed.connect(self._set_planet_info).bind(planet)
+            self.interface.groups["MainMenu"].get_element_by_name("Scroll").append_element("Button_" + str(random.randint(0, 999)), btn)
 
     def _set_planet_info(self, planet: Planet):
         self._show_info_planet = planet
@@ -239,9 +240,9 @@ class Game:
             keys = pygame.key.get_pressed()
             if self.process.is_processing:
                 if keys[pygame.K_w]:
-                    self.process.scale = pygame.math.clamp(self.process.scale + 2, 20, 180)
+                    self.process.scale = pygame.math.clamp(self.process.scale + 2, 20, 150)
                 elif keys[pygame.K_s]:
-                    self.process.scale = pygame.math.clamp(self.process.scale - 2, 20, 180)
+                    self.process.scale = pygame.math.clamp(self.process.scale - 2, 20, 150)
 
             self.interface.update(event_list)
 
@@ -250,6 +251,7 @@ class Game:
             for planet in self.planets:
                 planet.update(self.planets)
                 planet.draw(self.window)
+                planet.collide(self.planets)
 
             self.interface.draw()
 

@@ -66,6 +66,10 @@ class Canvas:
 
         self._update_size()
 
+    def clear_elements(self) -> None:
+        self.elements.clear()
+        self._update_size()
+
     def get_element_by_name(self, element_name: str) -> Element | None:
         for element in self.elements:
             if element_name == element[0]:

@@ -16,6 +16,10 @@ class Vector2:
         self.x = _tuple[0]
         self.y = _tuple[1]
 
+    def set_posf(self, _tuple: tuple[float, float]) -> None:
+        self.x = _tuple[0]
+        self.y = _tuple[1]
+
     def set_offset(self, _tuple: tuple[int, int]) -> None:
         self.offset.x = _tuple[0]
         self.offset.y = _tuple[1]
